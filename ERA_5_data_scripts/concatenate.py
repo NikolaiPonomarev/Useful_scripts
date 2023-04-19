@@ -6,6 +6,11 @@ from multiprocessing import Pool
 import xarray as xr
 import  os, sys
 
+#
+#This code converts era5 data from grid to netcdf format and also handles the conversion of 
+#the volumetric soil moisture to the soil moisture index (SMI) required for ICON simulations
+
+# Generate lists of dates and times of the day
 start_day = datetime.datetime.strptime("2022-12-23", "%Y-%m-%d")
 end_day = datetime.datetime.strptime("2022-12-31", "%Y-%m-%d")
 
@@ -29,6 +34,7 @@ def merge_gribs(date, time):
     outputfile_ml = 'era5_'+date.strftime('%Y%m%d')+"{:02d}".format(time.hour)+'_ml.nc'
     outputfile_sf = 'era5_'+date.strftime('%Y%m%d')+"{:02d}".format(time.hour)+'_surf.nc'
 
+    #use cdo to convert from grib to nc
     os.system('cdo -t ecmwf -f nc copy ' + inputfile_ml + ' ' + outputfile_ml)
     os.system('cdo -t ecmwf -f nc copy ' + inputfile_sf + ' ' + outputfile_sf)
 
@@ -76,7 +82,7 @@ for r in zip(dates_for_each_time, times_for_each_day):
     print('started for the date:   ', r)
     merge_gribs(r[0], r[1])
 '''
-
+#Process grib files in parallel
 if __name__ == '__main__':
     with Pool(8) as p:
         M = p.starmap(merge_gribs, zip(dates_for_each_time, times_for_each_day))

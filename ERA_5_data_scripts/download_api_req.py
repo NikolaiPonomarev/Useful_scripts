@@ -6,19 +6,26 @@ from multiprocessing import Pool
 import xarray as xr
 import  os, sys
 import glob
+
+#Generate dates for which you want to get the data
 start_day = datetime.datetime.strptime("2023-01-01", "%Y-%m-%d")
 end_day = datetime.datetime.strptime("2023-03-27", "%Y-%m-%d")
 
 generated_dates = [start_day + datetime.timedelta(days=x) for x in range(0, (end_day-start_day).days+1)]
 
+#Generate times of the day for which you want to get the data
 start = datetime.datetime.strptime("2022-01-01:00:00", "%Y-%m-%d:%H:%M")
 end = datetime.datetime.strptime("2022-01-01:23:00", "%Y-%m-%d:%H:%M")
 generated_times = np.array([datetime.time(i,0) for i in range(start.hour,end.hour+1)])
 
 print('Given dates ', generated_dates, generated_times)
 pattern = 'era5_'
+#Get the list of era5 files that are already present in the directory
 files = glob.glob(pattern + "*")
+
 def fetch_era5(date, time, dir2move='/scratch/snx3000/nponomar/ERA5'):
+
+    #Check if one of the files for the given date / time of the day already exists
     if ('era5_'+date.strftime('%Y%m%d')+"{:02d}".format(time.hour)+'_ml.grib' not in files) or ('era5_'+date.strftime('%Y%m%d')+"{:02d}".format(time.hour)+'_surf.grib' not in files):
         """Fetch ERA5 data from ECMWF for initial conditions
 
@@ -101,6 +108,7 @@ def fetch_era5(date, time, dir2move='/scratch/snx3000/nponomar/ERA5'):
 times_for_each_day = np.repeat([np.array(generated_times)], len(generated_dates), axis=0).flatten()
 dates_for_each_time = np.repeat(generated_dates, len(generated_times))
 
+#Request data in parallel for different days / times of the day
 if __name__ == '__main__':
     with Pool(42) as p:
         M = p.starmap(fetch_era5, zip(dates_for_each_time, times_for_each_day))
