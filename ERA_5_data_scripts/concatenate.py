@@ -7,7 +7,7 @@ import xarray as xr
 import  os, sys
 
 #
-#This code converts era5 data from grid to netcdf format and also handles the conversion of 
+#This code converts era5 data from grib to netcdf format and also handles the conversion of 
 #the volumetric soil moisture to the soil moisture index (SMI) required for ICON simulations
 
 # Generate lists of dates and times of the day
